@@ -1,0 +1,16 @@
+A Django app for generating srcsets, automatically resizing the images
+and specifying the correct markup.
+
+FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.1.0.
+
+Version 1.0 (release) will allow specifying width or width/height for
+single images and sets of images for the srcset attribute. Cropping
+options will be supported as well.
+
+For the most part, this app is intended to be used via template tags.
+A demonstation of currently supported functionality follows.
+
+	{% load srcset %}
+
+	{# resize an image attached to model instance to 500px width #}
+	<img src="{% src instance.image_field 500 %}"/>
