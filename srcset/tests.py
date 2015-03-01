@@ -10,38 +10,34 @@ from .models import OriginalImage, ResizedImage
 from .utils import get_sized_image
 
 
+def _create_original(name):
+    src = os.path.join(
+        os.path.dirname(__file__),
+        'test_media',
+        name
+    )
+    with open(src, 'rb') as src_file:
+        orig_path = default_storage.save(
+            os.path.join('test_images', name),
+            ImageFile(src_file)
+        )
+    return OriginalImage.objects.create(image_file=orig_path)
+
+
+def _clean_up_directory(path):
+    try:
+        os.rmdir(path)
+    except OSError:
+        pass
+
+
 class SrcsetTests(TestCase):
     def setUp(self):
-        src = os.path.join(
-            os.path.dirname(__file__),
-            'test_media',
-            'image1.jpg'
-        )
-        with open(src, 'rb') as src_file:
-            orig_path = default_storage.save(
-                os.path.join('test_images', 'image1.jpg'),
-                ImageFile(src_file)
-            )
-        self.orig = OriginalImage.objects.create(image_file=orig_path)
-    
-    def test_original(self):
-        # verify size of original
-        self.assertEqual(self.orig.image_file.width, 2688)
-        # verify that the same object is found the next time
-        (orig, created) = OriginalImage.objects.get_or_create(
-            image_file=self.orig.image_file.name
-        )
-        self.assertFalse(created)
-        self.assertEqual(orig, self.orig)
-        self.assertEqual(OriginalImage.objects.count(), 1)
+        self.orig1 = _create_original('image1.jpg')
     
     def test_resized_width(self):
-        resized = get_sized_image(self.orig.image_file, 500)
+        resized = get_sized_image(self.orig1.image_file, 500)
         self.assertEqual(OriginalImage.objects.count(), 1)
-        self.assertEqual(
-            OriginalImage.objects.get().width,
-            self.orig.image_file.width
-        )
         self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(resized.width, 500)
         self.assertEqual(
@@ -56,7 +52,7 @@ class SrcsetTests(TestCase):
     
     def test_src_width(self):
         template = Template('{% load srcset %}{% src image 500 %}')
-        context = Context({'image': self.orig.image_file})
+        context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(
             rendered,
@@ -77,5 +73,15 @@ class SrcsetTests(TestCase):
             image.image_file.delete(save=False)
         for image in ResizedImage.objects.all():
             image.image_file.delete(save=False)
-        #os.rmdir(os.path.join(settings.MEDIA_ROOT, 'test_images'))
-        #os.rmdir(os.path.join(settings.MEDIA_ROOT, 'resized_images', 'test_images'))
+        _clean_up_directory(os.path.join(settings.MEDIA_ROOT, 'test_images'))
+        _clean_up_directory(os.path.join(
+            settings.MEDIA_ROOT,
+            'resized_images',
+            'test_images',
+            'image1.jpg'
+        ))
+        _clean_up_directory(os.path.join(
+            settings.MEDIA_ROOT,
+            'resized_images',
+            'test_images'
+        ))
