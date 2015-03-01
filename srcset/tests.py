@@ -46,9 +46,31 @@ class SrcsetTests(TestCase):
         self.assertEqual(resized.width, 500)
         self.assertEqual(
             resized.image_file.name,
-            'resized_images/test_images/image1.jpg',
-            'Resized images should be saved under resized_images based on their original path.'
+            os.path.join(
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '500.jpg'
+            )
         )
+    
+    def test_src_width(self):
+        template = Template('{% load srcset %}{% src image 500 %}')
+        context = Context({'image': self.orig.image_file})
+        rendered = template.render(context)
+        self.assertEqual(
+            rendered,
+            os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '500.jpg'
+            )
+        )
+        self.assertEqual(ResizedImage.objects.count(), 1)
+        r = ResizedImage.objects.get()
+        self.assertEqual(r.width, 500)
     
     def tearDown(self):
         for image in OriginalImage.objects.all():

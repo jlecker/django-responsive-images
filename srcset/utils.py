@@ -21,8 +21,13 @@ def get_sized_image(image, width):
     image.close()
     data = StringIO()
     new_image.save(data, orig_image.format)
+    split_ext = image.name.rsplit('.', 1)
+    if len(split_ext) > 1:
+        ext = split_ext[-1]
+    else:
+        ext = ''
     resized_path = default_storage.save(
-        os.path.join('resized_images', image.name),
+        os.path.join('resized_images', image.name, '{}.{}'.format(width, ext)),
         File(data)
     )
     resized = ResizedImage.objects.create(
