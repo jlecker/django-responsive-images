@@ -11,8 +11,8 @@ from .models import OriginalImage, ResizedImage
 
 def get_sized_image(image, width):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
-    if width > image.width:
-        return image
+    if width >= image.width:
+        return orig
     ratio = width / float(image.width)
     height = int(image.height * ratio + 0.5)
     image.open()

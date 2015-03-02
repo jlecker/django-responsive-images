@@ -34,10 +34,12 @@ def _clean_up_directory(path):
 class SrcsetTests(TestCase):
     def setUp(self):
         self.orig1 = _create_original('image1.jpg')
+        self.orig2 = _create_original('image2.jpg')
     
-    def test_resized_width(self):
+    def test_resize_width_smaller(self):
         resized = get_sized_image(self.orig1.image_file, 500)
-        self.assertEqual(OriginalImage.objects.count(), 1)
+        # verify no additional OriginalImage
+        self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(resized.width, 500)
         self.assertEqual(
@@ -47,6 +49,18 @@ class SrcsetTests(TestCase):
                 'test_images',
                 'image1.jpg',
                 '500.jpg'
+            )
+        )
+    
+    def test_resize_width_larger(self):
+        resized = get_sized_image(self.orig2.image_file, 500)
+        self.assertFalse(ResizedImage.objects.exists())
+        self.assertEqual(resized.width, 300)
+        self.assertEqual(
+            resized.image_file.name,
+            os.path.join(
+                'test_images',
+                'image2.jpg'
             )
         )
     
@@ -79,6 +93,12 @@ class SrcsetTests(TestCase):
             'resized_images',
             'test_images',
             'image1.jpg'
+        ))
+        _clean_up_directory(os.path.join(
+            settings.MEDIA_ROOT,
+            'resized_images',
+            'test_images',
+            'image2.jpg'
         ))
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
