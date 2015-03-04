@@ -74,7 +74,7 @@ class SrcsetTests(TestCase):
         )
     
     def test_src_tag(self):
-        template = Template('{% load srcset %}{% src image "500x500" %}')
+        template = Template('{% load srcset %}{% src image 500x500 %}')
         context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(

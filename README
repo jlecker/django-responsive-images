@@ -13,4 +13,4 @@ A demonstation of currently supported functionality follows.
 	{% load srcset %}
 
 	{# resize an image attached to instance to fit 500x500 #}
-	<img src="{% src instance.image_field "500x500" %}"/>
+	<img src="{% src instance.image_field 500x500 %}"/>
