@@ -9,12 +9,12 @@ register = template.Library()
 @register.simple_tag
 def src(image, size):
     try:
-        width = int(size)
+        (width, height) = map(int, size.split('x'))
     except ValueError:
         raise template.TemplateSyntaxError(
-            'Second argument must be width.'
+            'Second argument must be WxH.'
         )
     if not image:
         return ''
-    resized = get_sized_image(image, width)
+    resized = get_sized_image(image, width, height)
     return resized.image_file.url

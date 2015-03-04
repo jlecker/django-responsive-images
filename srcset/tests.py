@@ -33,29 +33,38 @@ def _clean_up_directory(path):
 
 class SrcsetTests(TestCase):
     def setUp(self):
-        self.orig1 = _create_original('image1.jpg')
-        self.orig2 = _create_original('image2.jpg')
+        self.orig1 = _create_original('image1.jpg') # 2688x1520
+        self.orig2 = _create_original('image2.jpg') # 300x170
     
-    def test_resize_width_smaller(self):
-        resized = get_sized_image(self.orig1.image_file, 500)
-        # verify no additional OriginalImage
+    def test_resize(self):
+        resized = get_sized_image(self.orig1.image_file, 500, 500)
         self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 1)
-        self.assertEqual(resized.width, 500)
         self.assertEqual(
             resized.image_file.name,
             os.path.join(
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '500.jpg'
+                '500x500.jpg'
             )
         )
+
+    def notest_resize_smaller_nocrop(self):
+        # constrained by width
+        resized1 = get_sized_image(self.orig1.image_file, 400, 600)
+        self.assertEqual(resized1.width, 400)
+        self.assertEqual(resized1.width, 226)
+        # constrained by height
+        resized2 = get_sized_image(self.orig1.image_file, 400, 200)
+        self.assertEqual(resized2.width, 354)
+        self.assertEqual(resized2.width, 200)
     
-    def test_resize_width_larger(self):
-        resized = get_sized_image(self.orig2.image_file, 500)
+    def test_resize_larger(self):
+        resized = get_sized_image(self.orig2.image_file, 500, 500)
         self.assertFalse(ResizedImage.objects.exists())
         self.assertEqual(resized.width, 300)
+        self.assertEqual(resized.height, 170)
         self.assertEqual(
             resized.image_file.name,
             os.path.join(
@@ -64,8 +73,8 @@ class SrcsetTests(TestCase):
             )
         )
     
-    def test_src_width(self):
-        template = Template('{% load srcset %}{% src image 500 %}')
+    def test_src_tag(self):
+        template = Template('{% load srcset %}{% src image "500x500" %}')
         context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(
@@ -75,12 +84,12 @@ class SrcsetTests(TestCase):
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '500.jpg'
+                '500x500.jpg'
             )
         )
         self.assertEqual(ResizedImage.objects.count(), 1)
-        r = ResizedImage.objects.get()
-        self.assertEqual(r.width, 500)
+        self.assertEqual(ResizedImage.objects.get().width, 500)
+        self.assertEqual(ResizedImage.objects.get().height, 500)
     
     def tearDown(self):
         for image in OriginalImage.objects.all():

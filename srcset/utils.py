@@ -4,20 +4,21 @@ from StringIO import StringIO
 from django.core.files import File
 from django.core.files.storage import default_storage
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 from .models import OriginalImage, ResizedImage
 
 
-def get_sized_image(image, width):
+def get_sized_image(image, width, height):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
     if width >= image.width:
         return orig
-    ratio = width / float(image.width)
-    height = int(image.height * ratio + 0.5)
+    #ratio = width / float(image.width)
+    #height = int(image.height * ratio + 0.5)
     image.open()
     orig_image = Image.open(image)
-    new_image = orig_image.resize((width, height))
+    #new_image = orig_image.resize((width, height))
+    new_image = ImageOps.fit(orig_image, (width, height))
     image.close()
     data = StringIO()
     new_image.save(data, orig_image.format)
@@ -27,7 +28,10 @@ def get_sized_image(image, width):
     else:
         ext = ''
     resized_path = default_storage.save(
-        os.path.join('resized_images', image.name, '{}.{}'.format(width, ext)),
+        os.path.join(
+            'resized_images',
+            image.name,
+            '{}x{}.{}'.format(width, height, ext)),
         File(data)
     )
     resized = ResizedImage.objects.create(
