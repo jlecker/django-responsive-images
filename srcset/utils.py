@@ -9,16 +9,30 @@ from PIL import Image, ImageOps
 from .models import OriginalImage, ResizedImage
 
 
-def get_sized_image(image, width, height):
+def get_sized_image(image, width, height, crop=True):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
     if width >= image.width:
         return orig
-    #ratio = width / float(image.width)
-    #height = int(image.height * ratio + 0.5)
     image.open()
     orig_image = Image.open(image)
-    #new_image = orig_image.resize((width, height))
-    new_image = ImageOps.fit(orig_image, (width, height))
+    if crop:
+        new_image = ImageOps.fit(
+            orig_image,
+            (width, height),
+            method=Image.BICUBIC
+        )
+        crop_type = 'center'
+    else:
+        orig_aspect = image.width / float(image.height)
+        req_aspect = width / float(height)
+        if orig_aspect > req_aspect:
+            ratio = width / float(image.width)
+        else:
+            ratio = height / float(image.height)
+        width = int(image.width * ratio + 0.5)
+        height = int(image.height * ratio + 0.5)
+        new_image = orig_image.resize((width, height), resample=Image.BICUBIC)
+        crop_type = 'nocrop'
     image.close()
     data = StringIO()
     new_image.save(data, orig_image.format)
@@ -31,7 +45,7 @@ def get_sized_image(image, width, height):
         os.path.join(
             'resized_images',
             image.name,
-            '{}x{}.{}'.format(width, height, ext)),
+            '{}x{}_{}.{}'.format(width, height, crop_type, ext)),
         File(data)
     )
     resized = ResizedImage.objects.create(

@@ -46,19 +46,19 @@ class SrcsetTests(TestCase):
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '500x500.jpg'
+                '500x500_center.jpg'
             )
         )
 
-    def notest_resize_smaller_nocrop(self):
+    def test_resize_nocrop(self):
         # constrained by width
-        resized1 = get_sized_image(self.orig1.image_file, 400, 600)
+        resized1 = get_sized_image(self.orig1.image_file, 400, 600, crop=False)
         self.assertEqual(resized1.width, 400)
-        self.assertEqual(resized1.width, 226)
+        self.assertEqual(resized1.height, 226)
         # constrained by height
-        resized2 = get_sized_image(self.orig1.image_file, 400, 200)
+        resized2 = get_sized_image(self.orig1.image_file, 400, 200, crop=False)
         self.assertEqual(resized2.width, 354)
-        self.assertEqual(resized2.width, 200)
+        self.assertEqual(resized2.height, 200)
     
     def test_resize_larger(self):
         resized = get_sized_image(self.orig2.image_file, 500, 500)
@@ -84,12 +84,31 @@ class SrcsetTests(TestCase):
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '500x500.jpg'
+                '500x500_center.jpg'
             )
         )
         self.assertEqual(ResizedImage.objects.count(), 1)
-        self.assertEqual(ResizedImage.objects.get().width, 500)
-        self.assertEqual(ResizedImage.objects.get().height, 500)
+        resized = ResizedImage.objects.get()
+        self.assertEqual(resized.width, 500)
+        self.assertEqual(resized.height, 500)
+    
+    def test_src_tag_nocrop(self):
+        template = Template('{% load srcset %}{% src image 500x500 nocrop %}')
+        context = Context({'image': self.orig1.image_file})
+        rendered = template.render(context)
+        self.assertEqual(
+            rendered,
+            os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '500x283_nocrop.jpg'
+            )
+        )
+        resized = ResizedImage.objects.get()
+        self.assertEqual(resized.width, 500)
+        self.assertEqual(resized.height, 283)
     
     def tearDown(self):
         for image in OriginalImage.objects.all():
