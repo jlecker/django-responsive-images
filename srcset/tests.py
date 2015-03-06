@@ -52,26 +52,37 @@ class SrcsetTests(TestCase):
 
     def test_resize_one_nocrop(self):
         # constrained by width
-        resized1 = get_sized_image(self.orig1.image_file, (400, 600), crop=False)
-        self.assertEqual(resized1.width, 400)
-        self.assertEqual(resized1.height, 226)
+        r1 = get_sized_image(self.orig1.image_file, (400, 600), crop=False)
+        self.assertEqual(r1.size, (400, 226))
         # constrained by height
-        resized2 = get_sized_image(self.orig1.image_file, (400, 200), crop=False)
-        self.assertEqual(resized2.width, 354)
-        self.assertEqual(resized2.height, 200)
+        r2 = get_sized_image(self.orig1.image_file, (400, 200), crop=False)
+        self.assertEqual(r2.size, (354, 200))
     
     def test_resize_larger(self):
-        resized = get_sized_image(self.orig2.image_file, (500, 500))
+        r1 = get_sized_image(self.orig2.image_file, (500, 500))
         self.assertFalse(ResizedImage.objects.exists())
-        self.assertEqual(resized.width, 300)
-        self.assertEqual(resized.height, 170)
+        self.assertEqual(r1.size, (300, 170))
         self.assertEqual(
-            resized.image_file.name,
+            r1.image_file.name,
             os.path.join(
                 'test_images',
                 'image2.jpg'
             )
         )
+    
+    def test_resize_cases(self):
+        r1 = get_sized_image(self.orig2.image_file, (200, 200))
+        self.assertEqual(r1.size, (200, 170))
+        self.assertTrue(r1.image_file.name.endswith('200x170_center.jpg'))
+        r2 = get_sized_image(self.orig2.image_file, (300, 150))
+        self.assertEqual(r2.size, (300, 150))
+        self.assertTrue(r2.image_file.name.endswith('300x150_center.jpg'))
+        r3 = get_sized_image(self.orig2.image_file, (200, 200), crop=False)
+        self.assertEqual(r3.size, (200, 113))
+        self.assertTrue(r3.image_file.name.endswith('200x113_nocrop.jpg'))
+        r4 = get_sized_image(self.orig2.image_file, (300, 150), crop=False)
+        self.assertEqual(r4.size, (265, 150))
+        self.assertTrue(r4.image_file.name.endswith('265x150_nocrop.jpg'))
     
     def test_src_tag(self):
         template = Template('{% load srcset %}{% src image 500x500 %}')
@@ -88,9 +99,8 @@ class SrcsetTests(TestCase):
             )
         )
         self.assertEqual(ResizedImage.objects.count(), 1)
-        resized = ResizedImage.objects.get()
-        self.assertEqual(resized.width, 500)
-        self.assertEqual(resized.height, 500)
+        r1 = ResizedImage.objects.get()
+        self.assertEqual(r1.size, (500, 500))
     
     def test_src_tag_nocrop(self):
         template = Template('{% load srcset %}{% src image 500x500 nocrop %}')
@@ -106,9 +116,8 @@ class SrcsetTests(TestCase):
                 '500x283_nocrop.jpg'
             )
         )
-        resized = ResizedImage.objects.get()
-        self.assertEqual(resized.width, 500)
-        self.assertEqual(resized.height, 283)
+        r1 = ResizedImage.objects.get()
+        self.assertEqual(r1.size, (500, 283))
     
     def tearDown(self):
         for image in OriginalImage.objects.all():

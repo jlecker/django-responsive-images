@@ -11,11 +11,13 @@ from .models import OriginalImage, ResizedImage
 
 def get_sized_image(image, (width, height), crop=True):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
-    if width >= image.width:
+    if width >= image.width and height >= image.height:
         return orig
     image.open()
     orig_image = Image.open(image)
     if crop:
+        width = min(width, image.width)
+        height = min(height, image.height)
         new_image = ImageOps.fit(
             orig_image,
             (width, height),
