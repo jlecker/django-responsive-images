@@ -36,8 +36,8 @@ class SrcsetTests(TestCase):
         self.orig1 = _create_original('image1.jpg') # 2688x1520
         self.orig2 = _create_original('image2.jpg') # 300x170
     
-    def test_resize(self):
-        resized = get_sized_image(self.orig1.image_file, 500, 500)
+    def test_resize_one(self):
+        resized = get_sized_image(self.orig1.image_file, (500, 500))
         self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(
@@ -50,18 +50,18 @@ class SrcsetTests(TestCase):
             )
         )
 
-    def test_resize_nocrop(self):
+    def test_resize_one_nocrop(self):
         # constrained by width
-        resized1 = get_sized_image(self.orig1.image_file, 400, 600, crop=False)
+        resized1 = get_sized_image(self.orig1.image_file, (400, 600), crop=False)
         self.assertEqual(resized1.width, 400)
         self.assertEqual(resized1.height, 226)
         # constrained by height
-        resized2 = get_sized_image(self.orig1.image_file, 400, 200, crop=False)
+        resized2 = get_sized_image(self.orig1.image_file, (400, 200), crop=False)
         self.assertEqual(resized2.width, 354)
         self.assertEqual(resized2.height, 200)
     
     def test_resize_larger(self):
-        resized = get_sized_image(self.orig2.image_file, 500, 500)
+        resized = get_sized_image(self.orig2.image_file, (500, 500))
         self.assertFalse(ResizedImage.objects.exists())
         self.assertEqual(resized.width, 300)
         self.assertEqual(resized.height, 170)

@@ -9,7 +9,7 @@ from PIL import Image, ImageOps
 from .models import OriginalImage, ResizedImage
 
 
-def get_sized_image(image, width, height, crop=True):
+def get_sized_image(image, (width, height), crop=True):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
     if width >= image.width:
         return orig

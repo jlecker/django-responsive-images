@@ -44,8 +44,7 @@ class SrcNode(template.Node):
         image = self.image.resolve(context)
         return get_sized_image(
             image,
-            self.width,
-            self.height,
+            (self.width, self.height),
             self.crop
         ).image_file.url
 
