@@ -2,7 +2,7 @@ A Django app for generating srcsets, automatically resizing the images
 and specifying the correct markup.
 
 
-FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.5.0.
+FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.5.1.
 
 Version 1.0 (release) will allow specifying width or width/height for
 single images and sets of images for the srcset attribute. Cropping
@@ -11,7 +11,7 @@ options will be supported as well.
 
 For now, this can be installed from the GitHub repo with Pip:
 
-	pip install git+https://github.com/jlecker/django-sawhorse.git
+	pip install git+https://github.com/ConvectiveSoftware/django-srcset.git
 
 Version 1.0 will be made available on PyPI.
 
