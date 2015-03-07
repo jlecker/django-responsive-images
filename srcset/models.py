@@ -30,5 +30,5 @@ class ResizedImage(ImageModel):
     )
     crop = models.CharField(max_length=10)
     
-    #class Meta:
-    #    unique_together = ('original', 'width', 'height', 'crop')
+    class Meta:
+        unique_together = ('original', 'width', 'height', 'crop')
