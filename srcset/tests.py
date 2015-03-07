@@ -37,11 +37,11 @@ class SrcsetTests(TestCase):
         self.orig2 = _create_original('image2.jpg') # 300x170
     
     def test_resize_one(self):
-        resized = get_sized_image(self.orig1.image_file, (500, 500))
+        r1 = get_sized_image(self.orig1.image_file, (500, 500))
         self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(
-            resized.image_file.name,
+            r1.image_file.name,
             os.path.join(
                 'resized_images',
                 'test_images',
@@ -83,6 +83,11 @@ class SrcsetTests(TestCase):
         r4 = get_sized_image(self.orig2.image_file, (300, 150), crop=False)
         self.assertEqual(r4.size, (265, 150))
         self.assertTrue(r4.image_file.name.endswith('265x150_nocrop.jpg'))
+    
+    def test_resize_same(self):
+        r1 = get_sized_image(self.orig1.image_file, (500, 500))
+        r2 = get_sized_image(self.orig1.image_file, (500, 500))
+        self.assertEqual(r1, r2)
     
     def test_resize_multiple(self):
         (r1, r2, r3) = get_sized_images(self.orig1.image_file, [

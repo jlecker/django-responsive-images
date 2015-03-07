@@ -47,6 +47,18 @@ def get_sized_images(image, sizes, crop=True):
         if (width, height) == (image.width, image.height):
             resized.append(orig)
             continue
+        try:
+            found = ResizedImage.objects.get(
+                original=orig,
+                width=width,
+                height=height,
+                crop=crop_type
+            )
+        except ResizedImage.DoesNotExist:
+            pass
+        else:
+            resized.append(found)
+            continue
         
         if crop:
             new_image = ImageOps.fit(
@@ -80,7 +92,8 @@ def get_sized_images(image, sizes, crop=True):
         )
         resized.append(ResizedImage.objects.create(
             original=orig,
-            image_file=resized_path
+            image_file=resized_path,
+            crop=crop_type
         ))
     
     return resized
