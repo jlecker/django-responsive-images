@@ -9,49 +9,82 @@ from PIL import Image, ImageOps
 from .models import OriginalImage, ResizedImage
 
 
-def get_sized_image(image, (width, height), crop=True):
+def get_sized_images(image, sizes, crop=True):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
-    if width >= image.width and height >= image.height:
-        return orig
-    image.open()
-    orig_image = Image.open(image)
-    if crop:
+    
+    # filter out duplicates and larger than original
+    sizes_set = set()
+    for (width, height) in sizes:
         width = min(width, image.width)
         height = min(height, image.height)
-        new_image = ImageOps.fit(
-            orig_image,
-            (width, height),
-            method=Image.BICUBIC
-        )
+        sizes_set.add((width, height))
+    sizes = sorted(sizes_set)
+    
+    if sizes[0] == orig.size:
+        # smallest size is original image
+        return [orig]
+    
+    # common info to all resized images
+    if crop:
         crop_type = 'center'
     else:
-        orig_aspect = image.width / float(image.height)
-        req_aspect = width / float(height)
-        if orig_aspect > req_aspect:
-            ratio = width / float(image.width)
-        else:
-            ratio = height / float(image.height)
-        width = int(image.width * ratio + 0.5)
-        height = int(image.height * ratio + 0.5)
-        new_image = orig_image.resize((width, height), resample=Image.BICUBIC)
         crop_type = 'nocrop'
-    image.close()
-    data = StringIO()
-    new_image.save(data, orig_image.format)
     split_ext = image.name.rsplit('.', 1)
     if len(split_ext) > 1:
-        ext = split_ext[-1]
+        ext = '.' + split_ext[-1]
     else:
         ext = ''
-    resized_path = default_storage.save(
-        os.path.join(
-            'resized_images',
-            image.name,
-            '{}x{}_{}.{}'.format(width, height, crop_type, ext)),
-        File(data)
-    )
-    resized = ResizedImage.objects.create(
-        original=orig,
-        image_file=resized_path
-    )
+    
+    # open the original image
+    image.open()
+    orig_image = Image.open(image)
+    orig_image.load()
+    image.close()
+    
+    # create the resized images
+    resized = []
+    for (width, height) in sizes:
+        if (width, height) == (image.width, image.height):
+            resized.append(orig)
+            continue
+        
+        if crop:
+            new_image = ImageOps.fit(
+                orig_image,
+                (width, height),
+                method=Image.BICUBIC
+            )
+        else:
+            orig_aspect = image.width / float(image.height)
+            req_aspect = width / float(height)
+            if orig_aspect > req_aspect:
+                ratio = width / float(image.width)
+            else:
+                ratio = height / float(image.height)
+            width = int(image.width * ratio + 0.5)
+            height = int(image.height * ratio + 0.5)
+            
+            new_image = orig_image.resize(
+                (width, height),
+                resample=Image.BICUBIC
+            )
+        
+        data = StringIO()
+        new_image.save(data, orig_image.format)
+        resized_path = default_storage.save(
+            os.path.join(
+                'resized_images',
+                image.name,
+                '{}x{}_{}{}'.format(width, height, crop_type, ext)),
+            File(data)
+        )
+        resized.append(ResizedImage.objects.create(
+            original=orig,
+            image_file=resized_path
+        ))
+    
     return resized
+
+
+def get_sized_image(image, size, crop=True):
+    return get_sized_images(image, [size], crop)[0]

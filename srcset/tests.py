@@ -7,7 +7,7 @@ from django.template import Context, Template
 from django.test import TestCase
 
 from .models import OriginalImage, ResizedImage
-from .utils import get_sized_image
+from .utils import get_sized_image, get_sized_images
 
 
 def _create_original(name):
@@ -49,7 +49,7 @@ class SrcsetTests(TestCase):
                 '500x500_center.jpg'
             )
         )
-
+    
     def test_resize_one_nocrop(self):
         # constrained by width
         r1 = get_sized_image(self.orig1.image_file, (400, 600), crop=False)
@@ -83,6 +83,34 @@ class SrcsetTests(TestCase):
         r4 = get_sized_image(self.orig2.image_file, (300, 150), crop=False)
         self.assertEqual(r4.size, (265, 150))
         self.assertTrue(r4.image_file.name.endswith('265x150_nocrop.jpg'))
+    
+    def test_resize_multiple(self):
+        (r1, r2, r3) = get_sized_images(self.orig1.image_file, [
+            (1000, 1000),
+            (2000, 2000),
+            (3000, 3000),
+            (4000, 4000),
+        ])
+        self.assertEqual(r1.size, (1000, 1000))
+        self.assertTrue(r1.image_file.name.endswith('1000x1000_center.jpg'))
+        self.assertEqual(r2.size, (2000, 1520))
+        self.assertTrue(r2.image_file.name.endswith('2000x1520_center.jpg'))
+        self.assertEqual(r3.size, (2688, 1520))
+        self.assertTrue(r3.image_file.name.endswith('image1.jpg'))
+    
+    def test_resize_multiple_nocrop(self):
+        (r1, r2, r3) = get_sized_images(self.orig1.image_file, [
+            (1000, 1000),
+            (2000, 2000),
+            (3000, 3000),
+            (4000, 4000),
+        ], crop=False)
+        self.assertEqual(r1.size, (1000, 565))
+        self.assertTrue(r1.image_file.name.endswith('1000x565_nocrop.jpg'))
+        self.assertEqual(r2.size, (2000, 1131))
+        self.assertTrue(r2.image_file.name.endswith('2000x1131_nocrop.jpg'))
+        self.assertEqual(r3.size, (2688, 1520))
+        self.assertTrue(r3.image_file.name.endswith('image1.jpg'))
     
     def test_src_tag(self):
         template = Template('{% load srcset %}{% src image 500x500 %}')
