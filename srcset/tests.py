@@ -91,6 +91,8 @@ class SrcsetTests(TestCase):
             (3000, 3000),
             (4000, 4000),
         ])
+        self.assertEqual(OriginalImage.objects.count(), 2)
+        self.assertEqual(ResizedImage.objects.count(), 2)
         self.assertEqual(r1.size, (1000, 1000))
         self.assertTrue(r1.image_file.name.endswith('1000x1000_center.jpg'))
         self.assertEqual(r2.size, (2000, 1520))
@@ -146,6 +148,62 @@ class SrcsetTests(TestCase):
         )
         r1 = ResizedImage.objects.get()
         self.assertEqual(r1.size, (500, 283))
+    
+    def test_srcset_tag(self):
+        template = Template('{% load srcset %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 %}')
+        context = Context({'image': self.orig1.image_file})
+        rendered = template.render(context)
+        self.assertEqual(
+            rendered,
+            os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '1000x1000_center.jpg'
+            ) + ' 1000w, '
+            + os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '2000x1520_center.jpg'
+            ) + ' 2000w, '
+            + os.path.join(
+                settings.MEDIA_URL,
+                'test_images',
+                'image1.jpg'
+            ) + ' 2688w'
+        )
+        self.assertEqual(ResizedImage.objects.count(), 2)
+    
+    def test_srcset_tag_nocrop(self):
+        template = Template('{% load srcset %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 nocrop %}')
+        context = Context({'image': self.orig1.image_file})
+        rendered = template.render(context)
+        self.assertEqual(
+            rendered,
+            os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '1000x565_nocrop.jpg'
+            ) + ' 1000w, '
+            + os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image1.jpg',
+                '2000x1131_nocrop.jpg'
+            ) + ' 2000w, '
+            + os.path.join(
+                settings.MEDIA_URL,
+                'test_images',
+                'image1.jpg'
+            ) + ' 2688w'
+        )
+        self.assertEqual(ResizedImage.objects.count(), 2)
     
     def tearDown(self):
         for image in OriginalImage.objects.all():
