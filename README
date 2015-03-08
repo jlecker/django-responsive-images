@@ -2,7 +2,7 @@ A Django app for generating srcsets, automatically resizing the images
 and specifying the correct markup.
 
 
-FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.6.0.
+FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.6.1.
 
 Version 1.0 (release) will allow specifying width or width/height for
 single images and sets of images for the srcset attribute. Cropping
@@ -29,7 +29,7 @@ A demonstation of currently supported functionality follows.
 	<img src="{% src instance.image_field 500x500 nocrop %}"/>
 	
 	{# resize image multiple times and create srcset #}
-	<img srcset="{% srcset instance.image_field 400x400 800x800 1600x1600 %}">
+	<img srcset="{% srcset instance.field 400x400 800x800 1600x1600 %}">
 	
 	{# srcset also accepts the nocrop option #}
-	<img srcset="{% srcset instance.image_field 400x400 800x800 nocrop %}">
+	<img srcset="{% srcset instance.field 400x400 800x800 nocrop %}">

@@ -10,7 +10,7 @@ setup(
     author_email='james@convectivesoftware.com',
     url='https://github.com/ConvectiveSoftware/django-srcset',
     description='An Django app for resizing images and generating src and srcset attributes in HTML templates.',
-    packages=['srcset'],
+    packages=['srcset', 'srcset.templatetags'],
     classifiers=[
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
