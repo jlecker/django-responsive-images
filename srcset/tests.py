@@ -87,6 +87,7 @@ class SrcsetTests(TestCase):
     def test_resize_same(self):
         r1 = get_sized_image(self.orig1.image_file, (500, 500))
         r2 = get_sized_image(self.orig1.image_file, (500, 500))
+        self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(r1, r2)
     
     def test_resize_multiple(self):
@@ -153,6 +154,24 @@ class SrcsetTests(TestCase):
         )
         r1 = ResizedImage.objects.get()
         self.assertEqual(r1.size, (500, 283))
+    
+    def test_src_tag_same(self):
+        template = Template('{% load srcset %}{% src image 500x500 %}')
+        context = Context({'image': self.orig1.image_file})
+        rendered1 = template.render(context)
+        rendered2 = template.render(context)
+        for rendered in [rendered1, rendered2]:
+            self.assertEqual(
+                rendered,
+                os.path.join(
+                    settings.MEDIA_URL,
+                    'resized_images',
+                    'test_images',
+                    'image1.jpg',
+                    '500x500_center.jpg'
+                )
+            )
+        self.assertEqual(ResizedImage.objects.count(), 1)
     
     def test_srcset_tag(self):
         template = Template('{% load srcset %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 %}')
