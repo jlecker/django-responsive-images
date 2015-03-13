@@ -2,7 +2,7 @@ A Django app for generating srcsets, automatically resizing the images
 and specifying the correct markup.
 
 
-FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.6.1.
+FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.6.2.
 
 Version 1.0 (release) will allow specifying width or width/height for
 single images and sets of images for the srcset attribute. Cropping
