@@ -84,8 +84,14 @@ class SrcSetNode(template.Node):
         image = self.image.resolve(context)
         resized_list = get_sized_images(image, self.sizes, self.crop)
         srcset = ''
+        last_width = 0
         for resized in resized_list:
-            srcset += '{} {}w, '.format(resized.image_file.url, resized.width)
+            if resized.width != last_width:
+                srcset += '{} {}w, '.format(
+                    resized.image_file.url,
+                    resized.width
+                )
+                last_width = resized.width
         else:
             srcset = srcset[:-2]
         return srcset

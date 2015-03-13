@@ -229,6 +229,22 @@ class SrcsetTests(TestCase):
         )
         self.assertEqual(ResizedImage.objects.count(), 2)
     
+    def test_srcset_tag_same_width(self):
+        template = Template('{% load srcset %}{% srcset image 450x150 600x200 %}')
+        context = Context({'image': self.orig2.image_file})
+        rendered = template.render(context)
+        self.assertEqual(
+            rendered,
+            os.path.join(
+                settings.MEDIA_URL,
+                'resized_images',
+                'test_images',
+                'image2.jpg',
+                '300x150_center.jpg'
+            ) + ' 300w'
+        )
+        self.assertEqual(ResizedImage.objects.count(), 1)
+    
     def tearDown(self):
         for image in OriginalImage.objects.all():
             image.image_file.delete(save=False)
