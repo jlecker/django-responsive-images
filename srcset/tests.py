@@ -42,8 +42,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(r1.image_file.name, os.path.join(
             'resized_images',
-            'test_images',
-            'image1.jpg',
+            self.orig1.image_file.name,
             '500x500_50-50.jpg'
         ))
     
@@ -59,10 +58,7 @@ class SrcsetTests(TestCase):
         r1 = get_sized_image(self.orig2.image_file, (500, 500))
         self.assertFalse(ResizedImage.objects.exists())
         self.assertEqual(r1.size, (300, 170))
-        self.assertEqual(r1.image_file.name, os.path.join(
-            'test_images',
-            'image2.jpg'
-        ))
+        self.assertEqual(r1.image_file.name, self.orig2.image_file.name)
     
     def test_resize_cases(self):
         r1 = get_sized_image(self.orig2.image_file, (200, 200))
@@ -98,7 +94,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(r2.size, (2000, 1520))
         self.assertTrue(r2.image_file.name.endswith('2000x1520_50-50.jpg'))
         self.assertEqual(r3.size, (2688, 1520))
-        self.assertTrue(r3.image_file.name.endswith('image1.jpg'))
+        self.assertEqual(r3.image_file.name, self.orig1.image_file.name)
     
     def test_resize_multiple_nocrop(self):
         (r1, r2, r3) = get_sized_images(self.orig1.image_file, [
@@ -112,7 +108,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(r2.size, (2000, 1131))
         self.assertTrue(r2.image_file.name.endswith('2000x1131_nocrop.jpg'))
         self.assertEqual(r3.size, (2688, 1520))
-        self.assertTrue(r3.image_file.name.endswith('image1.jpg'))
+        self.assertEqual(r3.image_file.name, self.orig1.image_file.name)
     
     def test_src_tag(self):
         template = Template('{% load srcset %}{% src image 500x500 %}')
@@ -123,8 +119,7 @@ class SrcsetTests(TestCase):
             os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image1.jpg',
+                self.orig1.image_file.name,
                 '500x500_50-50.jpg'
             )
         )
@@ -141,8 +136,7 @@ class SrcsetTests(TestCase):
             os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image1.jpg',
+                self.orig1.image_file.name,
                 '500x283_nocrop.jpg'
             )
         )
@@ -163,8 +157,7 @@ class SrcsetTests(TestCase):
         center_crop_url = os.path.join(
             settings.MEDIA_URL,
             'resized_images',
-            'test_images',
-            'image1.jpg',
+            self.orig1.image_file.name,
             '500x500_50-50.jpg'
         )
         self.assertEqual(rendered1, center_crop_url)
@@ -173,8 +166,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(rendered4, os.path.join(
             settings.MEDIA_URL,
             'resized_images',
-            'test_images',
-            'image1.jpg',
+            self.orig1.image_file.name,
             '500x500_40-10.jpg'
         ))
         for resized in ResizedImage.objects.all():
@@ -191,8 +183,7 @@ class SrcsetTests(TestCase):
                 os.path.join(
                     settings.MEDIA_URL,
                     'resized_images',
-                    'test_images',
-                    'image1.jpg',
+                    self.orig1.image_file.name,
                     '500x500_50-50.jpg'
                 )
             )
@@ -207,21 +198,18 @@ class SrcsetTests(TestCase):
             os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image1.jpg',
+                self.orig1.image_file.name,
                 '1000x1000_50-50.jpg'
             ) + ' 1000w, '
             + os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image1.jpg',
+                self.orig1.image_file.name,
                 '2000x1520_50-50.jpg'
             ) + ' 2000w, '
             + os.path.join(
                 settings.MEDIA_URL,
-                'test_images',
-                'image1.jpg'
+                self.orig1.image_file.name,
             ) + ' 2688w'
         )
         self.assertEqual(ResizedImage.objects.count(), 2)
@@ -235,21 +223,18 @@ class SrcsetTests(TestCase):
             os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image1.jpg',
+                self.orig1.image_file.name,
                 '1000x565_nocrop.jpg'
             ) + ' 1000w, '
             + os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image1.jpg',
+                self.orig1.image_file.name,
                 '2000x1131_nocrop.jpg'
             ) + ' 2000w, '
             + os.path.join(
                 settings.MEDIA_URL,
-                'test_images',
-                'image1.jpg'
+                self.orig1.image_file.name,
             ) + ' 2688w'
         )
         self.assertEqual(ResizedImage.objects.count(), 2)
@@ -263,8 +248,7 @@ class SrcsetTests(TestCase):
             os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
-                'test_images',
-                'image2.jpg',
+                self.orig2.image_file.name,
                 '300x150_50-50.jpg'
             ) + ' 300w'
         )
@@ -279,14 +263,12 @@ class SrcsetTests(TestCase):
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
             'resized_images',
-            'test_images',
-            'image1.jpg'
+            self.orig1.image_file.name,
         ))
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
             'resized_images',
-            'test_images',
-            'image2.jpg'
+            self.orig2.image_file.name,
         ))
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
