@@ -2,7 +2,7 @@ A Django app for generating srcsets, automatically resizing the images
 and specifying the correct markup.
 
 
-FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.6.2.
+FULL FUNCTIONALITY STILL IN DEVELOPMENT!!! This is version 0.7.0.
 
 Version 1.0 (release) will allow specifying width or width/height for
 single images and sets of images for the srcset attribute. Cropping
@@ -22,14 +22,24 @@ A demonstation of currently supported functionality follows.
 	{% load srcset %}
 
 	{# resize and crop an image attached to instance to fit 500x500 #}
-	<img src="{% src instance.image_field 500x500 %}"/>
+	<img src="{% src instance.image_field 500x500 %}">
 
 	{# resize (without cropping) to fit 500x500 #}
 	{# note: resulting size will likely not match both dimensions #}
-	<img src="{% src instance.image_field 500x500 nocrop %}"/>
+	<img src="{% src instance.image_field 500x500 nocrop %}">
+	
+	{# specify crop position #}
+	<img src="{% src instance.image_field 500x500 50,20 %}">
 	
 	{# resize image multiple times and create srcset #}
 	<img srcset="{% srcset instance.field 400x400 800x800 1600x1600 %}">
 	
-	{# srcset also accepts the nocrop option #}
+	{# srcset also allows nocrop and crop position #}
 	<img srcset="{% srcset instance.field 400x400 800x800 nocrop %}">
+	<img srcset="{% srcset instance.field 400x400 800x800 50,20 %}">
+
+Note: If a specified size is larger than the source image in one or both
+dimensions, the resulting image will not match the specified size. Images
+will never be upscaled. The resulting image may be resized in only one
+dimension (if cropping) or it may return the original image. In either
+case, the srcset tag will output the correct width for the image used.
