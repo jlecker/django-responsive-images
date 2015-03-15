@@ -9,7 +9,7 @@ from PIL import Image, ImageOps
 from .models import OriginalImage, ResizedImage
 
 
-def get_sized_images(image, sizes, crop=True):
+def get_sized_images(image, sizes, crop=(50, 50)):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
     
     # filter out duplicates and larger than original
@@ -26,7 +26,7 @@ def get_sized_images(image, sizes, crop=True):
     
     # common info to all resized images
     if crop:
-        crop_type = 'center'
+        crop_type = '{}-{}'.format(*crop)
     else:
         crop_type = 'nocrop'
     split_ext = image.name.rsplit('.', 1)
@@ -64,7 +64,8 @@ def get_sized_images(image, sizes, crop=True):
             new_image = ImageOps.fit(
                 orig_image,
                 (width, height),
-                method=Image.BICUBIC
+                method=Image.BICUBIC,
+                centering=(crop[0] / 100.0, crop[1] / 100.0)
             )
         else:
             orig_aspect = image.width / float(image.height)
@@ -99,5 +100,5 @@ def get_sized_images(image, sizes, crop=True):
     return resized
 
 
-def get_sized_image(image, size, crop=True):
+def get_sized_image(image, size, crop=(50, 50)):
     return get_sized_images(image, [size], crop)[0]

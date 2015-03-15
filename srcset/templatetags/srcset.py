@@ -16,13 +16,26 @@ class SrcNode(template.Node):
             )
         if len(bits) == 3:
             (tag, image, size) = bits
-            crop = None
+            crop = (50, 50)
         else:
             (tag, image, size, crop) = bits
-            if crop not in ['crop', 'nocrop']:
-                raise template.TemplateSyntaxError(
-                    'If given, last argument must specify crop options.'
-                )
+            if crop in ['crop', 'center']:
+                crop = (50, 50)
+            elif crop == 'nocrop':
+                crop = None
+            else:
+                try:
+                    crop = tuple(map(int, crop.split(',')))
+                except ValueError:
+                    raise template.TemplateSyntaxError(
+                        'If given, last argument must specify crop.'
+                    )
+                else:
+                    for crop_dim in crop:
+                        if crop_dim > 100 or crop_dim < -100:
+                            raise template.TemplateSyntaxError(
+                                'Invalid crop percentage.'
+                            )
         try:
             (width, height) = map(int, size.split('x'))
         except ValueError:
@@ -35,10 +48,7 @@ class SrcNode(template.Node):
         self.image = template.Variable(image)
         self.width = width
         self.height = height
-        if crop == 'nocrop':
-            self.crop = False
-        else:
-            self.crop = True
+        self.crop = crop
     
     def render(self, context):
         image = self.image.resolve(context)
@@ -67,18 +77,31 @@ class SrcSetNode(template.Node):
         try:
             sizes.append(tuple(map(int, bits[-1].split('x'))))
         except ValueError:
-            crop = bits[-1]
+            if bits[-1] in ['crop', 'center']:
+                crop = (50, 50)
+            elif bits[-1] == 'nocrop':
+                crop = None
+            else:
+                try:
+                    crop = tuple(map(int, bits[-1].split(',')))
+                except ValueError:
+                    raise template.TemplateSyntaxError(
+                        'If not a size, last argument must specify crop.'
+                    )
+                else:
+                    for crop_dim in crop:
+                        if crop_dim > 100 or crop_dim < 100:
+                            raise template.TemplateSyntaxError(
+                                'Invalid crop percentage.'
+                            )
         else:
-            crop = None
+            crop = (50, 50)
         return cls(image, sizes, crop)
     
     def __init__(self, image, sizes, crop):
         self.image = template.Variable(image)
         self.sizes = sizes
-        if crop == 'nocrop':
-            self.crop = False
-        else:
-            self.crop = True
+        self.crop = crop
     
     def render(self, context):
         image = self.image.resolve(context)

@@ -40,15 +40,12 @@ class SrcsetTests(TestCase):
         r1 = get_sized_image(self.orig1.image_file, (500, 500))
         self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 1)
-        self.assertEqual(
-            r1.image_file.name,
-            os.path.join(
-                'resized_images',
-                'test_images',
-                'image1.jpg',
-                '500x500_center.jpg'
-            )
-        )
+        self.assertEqual(r1.image_file.name, os.path.join(
+            'resized_images',
+            'test_images',
+            'image1.jpg',
+            '500x500_50-50.jpg'
+        ))
     
     def test_resize_one_nocrop(self):
         # constrained by width
@@ -62,25 +59,22 @@ class SrcsetTests(TestCase):
         r1 = get_sized_image(self.orig2.image_file, (500, 500))
         self.assertFalse(ResizedImage.objects.exists())
         self.assertEqual(r1.size, (300, 170))
-        self.assertEqual(
-            r1.image_file.name,
-            os.path.join(
-                'test_images',
-                'image2.jpg'
-            )
-        )
+        self.assertEqual(r1.image_file.name, os.path.join(
+            'test_images',
+            'image2.jpg'
+        ))
     
     def test_resize_cases(self):
         r1 = get_sized_image(self.orig2.image_file, (200, 200))
         self.assertEqual(r1.size, (200, 170))
-        self.assertTrue(r1.image_file.name.endswith('200x170_center.jpg'))
+        self.assertTrue(r1.image_file.name.endswith('200x170_50-50.jpg'))
         r2 = get_sized_image(self.orig2.image_file, (300, 150))
         self.assertEqual(r2.size, (300, 150))
-        self.assertTrue(r2.image_file.name.endswith('300x150_center.jpg'))
-        r3 = get_sized_image(self.orig2.image_file, (200, 200), crop=False)
+        self.assertTrue(r2.image_file.name.endswith('300x150_50-50.jpg'))
+        r3 = get_sized_image(self.orig2.image_file, (200, 200), crop=None)
         self.assertEqual(r3.size, (200, 113))
         self.assertTrue(r3.image_file.name.endswith('200x113_nocrop.jpg'))
-        r4 = get_sized_image(self.orig2.image_file, (300, 150), crop=False)
+        r4 = get_sized_image(self.orig2.image_file, (300, 150), crop=None)
         self.assertEqual(r4.size, (265, 150))
         self.assertTrue(r4.image_file.name.endswith('265x150_nocrop.jpg'))
     
@@ -100,9 +94,9 @@ class SrcsetTests(TestCase):
         self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 2)
         self.assertEqual(r1.size, (1000, 1000))
-        self.assertTrue(r1.image_file.name.endswith('1000x1000_center.jpg'))
+        self.assertTrue(r1.image_file.name.endswith('1000x1000_50-50.jpg'))
         self.assertEqual(r2.size, (2000, 1520))
-        self.assertTrue(r2.image_file.name.endswith('2000x1520_center.jpg'))
+        self.assertTrue(r2.image_file.name.endswith('2000x1520_50-50.jpg'))
         self.assertEqual(r3.size, (2688, 1520))
         self.assertTrue(r3.image_file.name.endswith('image1.jpg'))
     
@@ -112,7 +106,7 @@ class SrcsetTests(TestCase):
             (2000, 2000),
             (3000, 3000),
             (4000, 4000),
-        ], crop=False)
+        ], crop=None)
         self.assertEqual(r1.size, (1000, 565))
         self.assertTrue(r1.image_file.name.endswith('1000x565_nocrop.jpg'))
         self.assertEqual(r2.size, (2000, 1131))
@@ -131,7 +125,7 @@ class SrcsetTests(TestCase):
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '500x500_center.jpg'
+                '500x500_50-50.jpg'
             )
         )
         self.assertEqual(ResizedImage.objects.count(), 1)
@@ -155,6 +149,37 @@ class SrcsetTests(TestCase):
         r1 = ResizedImage.objects.get()
         self.assertEqual(r1.size, (500, 283))
     
+    def test_src_tag_crop(self):
+        template1 = Template('{% load srcset %}{% src image 500x500 %}')
+        template2 = Template('{% load srcset %}{% src image 500x500 crop %}')
+        template3 = Template('{% load srcset %}{% src image 500x500 center %}')
+        template4 = Template('{% load srcset %}{% src image 500x500 40,10 %}')
+        context = Context({'image': self.orig1.image_file})
+        rendered1 = template1.render(context)
+        rendered2 = template2.render(context)
+        rendered3 = template3.render(context)
+        rendered4 = template4.render(context)
+        self.assertEqual(ResizedImage.objects.count(), 2)
+        center_crop_url = os.path.join(
+            settings.MEDIA_URL,
+            'resized_images',
+            'test_images',
+            'image1.jpg',
+            '500x500_50-50.jpg'
+        )
+        self.assertEqual(rendered1, center_crop_url)
+        self.assertEqual(rendered2, center_crop_url)
+        self.assertEqual(rendered3, center_crop_url)
+        self.assertEqual(rendered4, os.path.join(
+            settings.MEDIA_URL,
+            'resized_images',
+            'test_images',
+            'image1.jpg',
+            '500x500_40-10.jpg'
+        ))
+        for resized in ResizedImage.objects.all():
+            self.assertEqual(resized.size, (500, 500))
+    
     def test_src_tag_same(self):
         template = Template('{% load srcset %}{% src image 500x500 %}')
         context = Context({'image': self.orig1.image_file})
@@ -168,7 +193,7 @@ class SrcsetTests(TestCase):
                     'resized_images',
                     'test_images',
                     'image1.jpg',
-                    '500x500_center.jpg'
+                    '500x500_50-50.jpg'
                 )
             )
         self.assertEqual(ResizedImage.objects.count(), 1)
@@ -184,14 +209,14 @@ class SrcsetTests(TestCase):
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '1000x1000_center.jpg'
+                '1000x1000_50-50.jpg'
             ) + ' 1000w, '
             + os.path.join(
                 settings.MEDIA_URL,
                 'resized_images',
                 'test_images',
                 'image1.jpg',
-                '2000x1520_center.jpg'
+                '2000x1520_50-50.jpg'
             ) + ' 2000w, '
             + os.path.join(
                 settings.MEDIA_URL,
@@ -240,7 +265,7 @@ class SrcsetTests(TestCase):
                 'resized_images',
                 'test_images',
                 'image2.jpg',
-                '300x150_center.jpg'
+                '300x150_50-50.jpg'
             ) + ' 300w'
         )
         self.assertEqual(ResizedImage.objects.count(), 1)
