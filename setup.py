@@ -5,7 +5,7 @@ import responsive_images
 
 setup(
     name='django-responsive-images',
-    version=srcset.__version__,
+    version=responsive_images.__version__,
     author='James Lecker Jr',
     author_email='james@convectivesoftware.com',
     url='https://github.com/ConvectiveSoftware/django-responsive-images',
