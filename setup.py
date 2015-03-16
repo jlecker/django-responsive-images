@@ -10,7 +10,7 @@ setup(
     author_email='james@convectivesoftware.com',
     url='https://github.com/ConvectiveSoftware/django-responsive-images',
     description='An Django app for resizing images and generating src and srcset attributes via template tags.',
-    download_url='https://github.com/ConvectiveSoftware/django-responsive-images/tarball/{}'.format(srcset.__version__),
+    download_url='https://github.com/ConvectiveSoftware/django-responsive-images/tarball/{}'.format(responsive_images.__version__),
     packages=['responsive_images', 'responsive_images.templatetags'],
     classifiers=[
         'License :: OSI Approved :: MIT License',
