@@ -41,7 +41,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(OriginalImage.objects.count(), 2)
         self.assertEqual(ResizedImage.objects.count(), 1)
         self.assertEqual(r1.image_file.name, os.path.join(
-            'resized_images',
+            'responsive_images',
             self.orig1.image_file.name,
             '500x500_50-50.jpg'
         ))
@@ -118,7 +118,7 @@ class SrcsetTests(TestCase):
             rendered,
             os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig1.image_file.name,
                 '500x500_50-50.jpg'
             )
@@ -135,7 +135,7 @@ class SrcsetTests(TestCase):
             rendered,
             os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig1.image_file.name,
                 '500x283_nocrop.jpg'
             )
@@ -156,7 +156,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(ResizedImage.objects.count(), 2)
         center_crop_url = os.path.join(
             settings.MEDIA_URL,
-            'resized_images',
+            'responsive_images',
             self.orig1.image_file.name,
             '500x500_50-50.jpg'
         )
@@ -165,7 +165,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(rendered3, center_crop_url)
         self.assertEqual(rendered4, os.path.join(
             settings.MEDIA_URL,
-            'resized_images',
+            'responsive_images',
             self.orig1.image_file.name,
             '500x500_40-10.jpg'
         ))
@@ -182,7 +182,7 @@ class SrcsetTests(TestCase):
                 rendered,
                 os.path.join(
                     settings.MEDIA_URL,
-                    'resized_images',
+                    'responsive_images',
                     self.orig1.image_file.name,
                     '500x500_50-50.jpg'
                 )
@@ -197,13 +197,13 @@ class SrcsetTests(TestCase):
             rendered,
             os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig1.image_file.name,
                 '1000x1000_50-50.jpg'
             ) + ' 1000w, '
             + os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig1.image_file.name,
                 '2000x1520_50-50.jpg'
             ) + ' 2000w, '
@@ -222,13 +222,13 @@ class SrcsetTests(TestCase):
             rendered,
             os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig1.image_file.name,
                 '1000x565_nocrop.jpg'
             ) + ' 1000w, '
             + os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig1.image_file.name,
                 '2000x1131_nocrop.jpg'
             ) + ' 2000w, '
@@ -247,7 +247,7 @@ class SrcsetTests(TestCase):
             rendered,
             os.path.join(
                 settings.MEDIA_URL,
-                'resized_images',
+                'responsive_images',
                 self.orig2.image_file.name,
                 '300x150_50-50.jpg'
             ) + ' 300w'
@@ -262,16 +262,16 @@ class SrcsetTests(TestCase):
         _clean_up_directory(os.path.join(settings.MEDIA_ROOT, 'test_images'))
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
-            'resized_images',
+            'responsive_images',
             self.orig1.image_file.name,
         ))
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
-            'resized_images',
+            'responsive_images',
             self.orig2.image_file.name,
         ))
         _clean_up_directory(os.path.join(
             settings.MEDIA_ROOT,
-            'resized_images',
+            'responsive_images',
             'test_images'
         ))

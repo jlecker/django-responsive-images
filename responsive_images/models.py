@@ -24,7 +24,7 @@ class OriginalImage(ImageModel):
 class ResizedImage(ImageModel):
     original = models.ForeignKey(OriginalImage, db_index=True)
     image_file = models.ImageField(
-        upload_to='resized_images',
+        upload_to='responsive_images',
         height_field='height',
         width_field='width',
     )

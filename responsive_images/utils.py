@@ -86,7 +86,7 @@ def get_sized_images(image, sizes, crop=(50, 50)):
         new_image.save(data, orig_image.format)
         resized_path = default_storage.save(
             os.path.join(
-                'resized_images',
+                'responsive_images',
                 image.name,
                 '{}x{}_{}{}'.format(width, height, crop_type, ext)),
             File(data)

@@ -6,7 +6,7 @@ For now, this can be installed from the GitHub repo with Pip:
 
 	pip install git+https://github.com/ConvectiveSoftware/django-responsive-images.git
 
-Version 1.0 will be made available on PyPI. This is version 0.7.1.
+Version 1.0 will be made available on PyPI. This is version 0.7.2.
 
 
 For the most part, this app is intended to be used via template tags.
