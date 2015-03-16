@@ -1,12 +1,12 @@
-A Django app for generating srcsets, automatically resizing the images
-and specifying the correct markup.
+A Django app for resizing images and generating src and srcset
+values via template tags.
 
 
-For now, this can be installed from the GitHub repo with Pip:
-
-	pip install git+https://github.com/ConvectiveSoftware/django-responsive-images.git
-
-Version 1.0 will be made available on PyPI. This is version 0.7.2.
+Install via pip:
+	
+	pip install django-responsive-images
+	
+Then add 'responsive_images' to your INSTALLED_APPS.
 
 
 For the most part, this app is intended to be used via template tags.
@@ -21,8 +21,14 @@ A demonstation of currently supported functionality follows.
 	{# note: resulting size will likely not match both dimensions #}
 	<img src="{% src instance.image_field 500x500 nocrop %}">
 	
-	{# specify crop position #}
+	{# specify crop position as percent: X,Y #}
 	<img src="{% src instance.image_field 500x500 50,20 %}">
+	
+	{# center crop is the default, all of these are equivalent #}
+	<img src="{% src instance.image_field 500x500 %}">
+	<img src="{% src instance.image_field 500x500 crop %}">
+	<img src="{% src instance.image_field 500x500 center %}">
+	<img src="{% src instance.image_field 500x500 50,50 %}">
 	
 	{# resize image multiple times and create srcset #}
 	<img srcset="{% srcset instance.field 400x400 800x800 1600x1600 %}">
