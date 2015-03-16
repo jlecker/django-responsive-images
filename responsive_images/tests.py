@@ -111,7 +111,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(r3.image_file.name, self.orig1.image_file.name)
     
     def test_src_tag(self):
-        template = Template('{% load srcset %}{% src image 500x500 %}')
+        template = Template('{% load responsive_images %}{% src image 500x500 %}')
         context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(
@@ -128,7 +128,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(r1.size, (500, 500))
     
     def test_src_tag_nocrop(self):
-        template = Template('{% load srcset %}{% src image 500x500 nocrop %}')
+        template = Template('{% load responsive_images %}{% src image 500x500 nocrop %}')
         context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(
@@ -144,10 +144,10 @@ class SrcsetTests(TestCase):
         self.assertEqual(r1.size, (500, 283))
     
     def test_src_tag_crop(self):
-        template1 = Template('{% load srcset %}{% src image 500x500 %}')
-        template2 = Template('{% load srcset %}{% src image 500x500 crop %}')
-        template3 = Template('{% load srcset %}{% src image 500x500 center %}')
-        template4 = Template('{% load srcset %}{% src image 500x500 40,10 %}')
+        template1 = Template('{% load responsive_images %}{% src image 500x500 %}')
+        template2 = Template('{% load responsive_images %}{% src image 500x500 crop %}')
+        template3 = Template('{% load responsive_images %}{% src image 500x500 center %}')
+        template4 = Template('{% load responsive_images %}{% src image 500x500 40,10 %}')
         context = Context({'image': self.orig1.image_file})
         rendered1 = template1.render(context)
         rendered2 = template2.render(context)
@@ -173,7 +173,7 @@ class SrcsetTests(TestCase):
             self.assertEqual(resized.size, (500, 500))
     
     def test_src_tag_same(self):
-        template = Template('{% load srcset %}{% src image 500x500 %}')
+        template = Template('{% load responsive_images %}{% src image 500x500 %}')
         context = Context({'image': self.orig1.image_file})
         rendered1 = template.render(context)
         rendered2 = template.render(context)
@@ -190,7 +190,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(ResizedImage.objects.count(), 1)
     
     def test_srcset_tag(self):
-        template = Template('{% load srcset %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 %}')
+        template = Template('{% load responsive_images %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 %}')
         context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(
@@ -215,7 +215,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(ResizedImage.objects.count(), 2)
     
     def test_srcset_tag_nocrop(self):
-        template = Template('{% load srcset %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 nocrop %}')
+        template = Template('{% load responsive_images %}{% srcset image 1000x1000 2000x2000 3000x3000 4000x4000 nocrop %}')
         context = Context({'image': self.orig1.image_file})
         rendered = template.render(context)
         self.assertEqual(
@@ -240,7 +240,7 @@ class SrcsetTests(TestCase):
         self.assertEqual(ResizedImage.objects.count(), 2)
     
     def test_srcset_tag_same_width(self):
-        template = Template('{% load srcset %}{% srcset image 450x150 600x200 %}')
+        template = Template('{% load responsive_images %}{% srcset image 450x150 600x200 %}')
         context = Context({'image': self.orig2.image_file})
         rendered = template.render(context)
         self.assertEqual(
