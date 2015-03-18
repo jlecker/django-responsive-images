@@ -1,10 +1,14 @@
 from distutils.core import setup
+import os
 
 import responsive_images
 
 
-with open('README.rst') as readme:
-    long_desc = readme.read()
+if os.path.exists('README.rst'):
+    with open('README.rst') as readme:
+        long_desc = readme.read()
+else:
+    long_desc = ''
 
 setup(
     name='django-responsive-images',
