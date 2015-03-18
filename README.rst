@@ -1,16 +1,26 @@
-A Django app for resizing images and generating src and srcset
-values via template tags.
+Django Responsive Images
+========================
+
+A Django app for resizing images and generating src and srcset values
+via template tags. It is intended to be very easy-to-use; just drop it
+in and use the template tags.
 
 
-Install via pip:
+Installation
+------------
+
+Install via pip::
 	
 	pip install django-responsive-images
 	
-Then add 'responsive_images' to your INSTALLED_APPS.
+Then add ``responsive_images`` to your INSTALLED_APPS.
 
+
+Usage
+-----
 
 For the most part, this app is intended to be used via template tags.
-A demonstation of currently supported functionality follows.
+A demonstation of currently supported functionality follows::
 
 	{% load responsive_images %}
 
