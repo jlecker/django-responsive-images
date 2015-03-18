@@ -5,6 +5,8 @@ A Django app for resizing images and generating src and srcset values
 via template tags. It is intended to be very easy-to-use; just drop it
 in and use the template tags.
 
+Requires Django and Pillow.
+
 
 Installation
 ------------
