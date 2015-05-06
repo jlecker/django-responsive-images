@@ -15,6 +15,7 @@ class ImageModel(models.Model):
 
 class OriginalImage(ImageModel):
     image_file = models.ImageField(
+        upload_to='original_images', # required for Django 1.6, but not used
         height_field='height',
         width_field='width',
         db_index=True
