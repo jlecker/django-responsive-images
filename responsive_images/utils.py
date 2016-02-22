@@ -17,6 +17,15 @@ def get_sized_images(image, sizes, crop=(50, 50)):
     for (width, height) in sizes:
         width = min(width, image.width)
         height = min(height, image.height)
+        if not crop:
+            orig_aspect = image.width / float(image.height)
+            req_aspect = width / float(height)
+            if orig_aspect > req_aspect:
+                ratio = width / float(image.width)
+            else:
+                ratio = height / float(image.height)
+            width = int(image.width * ratio + 0.5)
+            height = int(image.height * ratio + 0.5)
         sizes_set.add((width, height))
     sizes = sorted(sizes_set)
     
@@ -68,15 +77,6 @@ def get_sized_images(image, sizes, crop=(50, 50)):
                 centering=(crop[0] / 100.0, crop[1] / 100.0)
             )
         else:
-            orig_aspect = image.width / float(image.height)
-            req_aspect = width / float(height)
-            if orig_aspect > req_aspect:
-                ratio = width / float(image.width)
-            else:
-                ratio = height / float(image.height)
-            width = int(image.width * ratio + 0.5)
-            height = int(image.height * ratio + 0.5)
-            
             new_image = orig_image.resize(
                 (width, height),
                 resample=Image.BICUBIC
