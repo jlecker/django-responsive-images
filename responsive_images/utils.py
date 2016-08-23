@@ -1,5 +1,8 @@
 import os
-from StringIO import StringIO
+try:
+    from StringIO import StringIO as IO
+except ImportError:
+    from io import BytesIO as IO
 
 from django.core.files import File
 from django.core.files.storage import default_storage
@@ -11,7 +14,7 @@ from .models import OriginalImage, ResizedImage
 
 def get_sized_images(image, sizes, crop=(50, 50)):
     (orig, c) = OriginalImage.objects.get_or_create(image_file=image.name)
-    
+
     # filter out duplicates and larger than original
     sizes_set = set()
     for (width, height) in sizes:
@@ -28,11 +31,11 @@ def get_sized_images(image, sizes, crop=(50, 50)):
             height = int(image.height * ratio + 0.5)
         sizes_set.add((width, height))
     sizes = sorted(sizes_set)
-    
+
     if sizes[0] == orig.size:
         # smallest size is original image
         return [orig]
-    
+
     # common info to all resized images
     if crop:
         crop_type = '{}-{}'.format(*crop)
@@ -43,13 +46,13 @@ def get_sized_images(image, sizes, crop=(50, 50)):
         ext = '.' + split_ext[-1]
     else:
         ext = ''
-    
+
     # open the original image
     image.open()
     orig_image = Image.open(image)
     orig_image.load()
     image.close()
-    
+
     # create the resized images
     resized = []
     for (width, height) in sizes:
@@ -68,7 +71,7 @@ def get_sized_images(image, sizes, crop=(50, 50)):
         else:
             resized.append(found)
             continue
-        
+
         if crop:
             new_image = ImageOps.fit(
                 orig_image,
@@ -81,8 +84,8 @@ def get_sized_images(image, sizes, crop=(50, 50)):
                 (width, height),
                 resample=Image.BICUBIC
             )
-        
-        data = StringIO()
+
+        data = IO()
         new_image.save(data, orig_image.format)
         resized_path = default_storage.save(
             os.path.join(
@@ -96,7 +99,7 @@ def get_sized_images(image, sizes, crop=(50, 50)):
             image_file=resized_path,
             crop=crop_type
         ))
-    
+
     return resized
 
 
